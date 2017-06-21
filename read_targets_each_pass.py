@@ -29,11 +29,18 @@ for filename in os.listdir(os.getcwd()):
 nt = unique(t, keys=['TILEID'], keep='last')
 joined_table = join(nt, pass_desi, keys='TILEID')
 new_table = joined_table.group_by('PASS')
-new_tab_survey= new_table.group_by('PROGRAM')
-sumvals = new_tab_survey.groups.aggregate(np.sum)
-print(sumvals)
-print(NLRG)
-print(NELG)
-print(NQSO)
+ink =new_table.groups.indices
+
+new_tab_survey_dark=new_table[ink[0]:ink[1]].group_by('PROGRAM')
+sumvals = new_tab_survey_dark.groups.aggregate(np.sum)
+avvals = new_tab_survey_dark.groups.aggregate(np.mean)
+output_tab_D = Table([sumvals['ELG'], sumvals['LRG'], sumvals['QSO'], sumvals['PASS'],sumvals['PROGRAM']], names=('ELG', 'LRG', 'QSO', 'PASS', 'PROGRAM'))
+for i in range(1,len(ink)-1):
+    new_tab_survey_dark=new_table[ink[i]:ink[i+1]].group_by('PROGRAM')
+    sumvals = new_tab_survey_dark.groups.aggregate(np.sum)
+    avvals = new_tab_survey_dark.groups.aggregate(np.mean)
+    output_tab_D.add_row([sumvals['ELG'], sumvals['LRG'], sumvals['QSO'], avvals['PASS'], sumvals['PROGRAM']])
+print(output_tab_D)
+
          
 
